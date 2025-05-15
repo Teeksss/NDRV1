@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ndr-config
+data:
+  app.config.json: |
+    {
+      "app": {
+        "name": "NDR Korelasyon Motoru",
+        "environment": "production",
+        "apiPrefix": "api",
+        "cors": {
+          "origin": "https://ndr.example.com",
+          "methods": "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
+          "credentials": true
+        },
+        "features": {
+          "enableSwagger": false,
+          "enableCompression": true,
+          "enableHelmet": true
+        }
+      },
+      "logging": {
+        "level": "info",
+        "console": true,
+        "file": true,
+        "directory": "/app/logs",
+        "maxSize": "50m",
+        "maxFiles": "30d"
+      },
+      "correlation": {
+        "eventsTtl": 604800,
+        "maxQueueSize": 100000,
+        "evaluationThreads": 8
+      },
+      "notifications": {
+        "email": {
+          "enabled": true,
+          "from": "alerts@example.com"
+        },
+        "webhook": {
+          "enabled": true,
+          "urls": ["https://webhook.example.com/endpoint"]
+        }
+      }
+    }

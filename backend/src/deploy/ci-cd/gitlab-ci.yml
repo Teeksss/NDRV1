@@ -1,0 +1,134 @@
+stages:
+  - build
+  - test
+  - security
+  - deploy
+
+variables:
+  DOCKER_REGISTRY: your-registry.example.com
+  IMAGE_NAME: ndr-correlation-engine
+  IMAGE_TAG: $CI_COMMIT_SHORT_SHA
+
+# Cache node_modules between jobs
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - node_modules/
+
+# Build stage
+build:
+  stage: build
+  image: node:18-alpine
+  script:
+    - npm ci
+    - npm run build
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 1 day
+
+# Unit tests
+unit_tests:
+  stage: test
+  image: node:18-alpine
+  script:
+    - npm ci
+    - npm run test
+
+# End-to-end tests
+e2e_tests:
+  stage: test
+  image: node:18-alpine
+  services:
+    - mongo:5.0
+  variables:
+    MONGODB_URI: "mongodb://mongo:27017/ndr-test"
+  script:
+    - npm ci
+    - npm run test:e2e
+  allow_failure: true
+
+# Linting
+lint:
+  stage: test
+  image: node:18-alpine
+  script:
+    - npm ci
+    - npm run lint
+
+# Security scanning
+security_scan:
+  stage: security
+  image: node:18-alpine
+  script:
+    - npm ci
+    - npm audit
+    - npm install -g snyk
+    - snyk auth $SNYK_TOKEN
+    - snyk test
+  allow_failure: true
+
+# Build Docker image
+docker_build:
+  stage: deploy
+  image: docker:20.10.16
+  services:
+    - docker:20.10.16-dind
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $DOCKER_REGISTRY
+  script:
+    - docker build -t $DOCKER_REGISTRY/$IMAGE_NAME:$IMAGE_TAG -t $DOCKER_REGISTRY/$IMAGE_NAME:latest -f src/deploy/Dockerfile .
+    - docker push $DOCKER_REGISTRY/$IMAGE_NAME:$IMAGE_TAG
+    - docker push $DOCKER_REGISTRY/$IMAGE_NAME:latest
+  only:
+    - main
+    - staging
+
+# Deploy to development
+deploy_dev:
+  stage: deploy
+  image: 
+    name: amazon/aws-cli:latest
+    entrypoint: [""]
+  script:
+    - aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+    - aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+    - aws configure set region $AWS_DEFAULT_REGION
+    - aws ecs update-service --cluster ndr-cluster-development --service ndr-service-development --force-new-deployment
+  environment:
+    name: development
+  only:
+    - develop
+
+# Deploy to staging
+deploy_staging:
+  stage: deploy
+  image: 
+    name: amazon/aws-cli:latest
+    entrypoint: [""]
+  script:
+    - aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+    - aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+    - aws configure set region $AWS_DEFAULT_REGION
+    - aws ecs update-service --cluster ndr-cluster-staging --service ndr-service-staging --force-new-deployment
+  environment:
+    name: staging
+  only:
+    - staging
+
+# Deploy to production
+deploy_prod:
+  stage: deploy
+  image: 
+    name: amazon/aws-cli:latest
+    entrypoint: [""]
+  script:
+    - aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+    - aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+    - aws configure set region $AWS_DEFAULT_REGION
+    - aws ecs update-service --cluster ndr-cluster-production --service ndr-service-production --force-new-deployment
+  environment:
+    name: production
+  only:
+    - main
+  when: manual

@@ -1,0 +1,32 @@
+.full-width {
+  width: 100%;
+}
+
+.tag-exists-warning {
+  display: flex;
+  align-items: center;
+  color: var(--warn);
+  margin-top: 8px;
+  
+  mat-icon {
+    margin-right: 8px;
+  }
+}
+
+.suggested-tags {
+  margin-top: 16px;
+  
+  h3 {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+}
+
+.tag-chips {
+  margin-top: 8px;
+}
+
+::ng-deep .mat-chip {
+  cursor: pointer;
+}

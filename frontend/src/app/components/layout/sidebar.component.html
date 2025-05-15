@@ -1,0 +1,58 @@
+<aside class="sidebar" [class.collapsed]="collapsed">
+  <div class="sidebar-content">
+    <!-- Main navigation -->
+    <nav class="sidebar-nav">
+      <ul class="nav-list">
+        <ng-container *ngFor="let item of menuItems">
+          <!-- Skip items that require specific roles or disabled features -->
+          <ng-container *ngIf="hasRequiredRole(item.requiredRole) && isFeatureEnabled(item.featureFlag)">
+            <!-- Menu items with children -->
+            <li class="nav-item" *ngIf="item.children && item.children.length > 0" 
+                [class.active]="activeMenuItem === item.route"
+                [class.expanded]="item.expanded">
+              <a class="nav-link" href="#" (click)="toggleMenuItem(item, $event)">
+                <mat-icon class="nav-icon">{{ item.icon }}</mat-icon>
+                <span class="nav-text">{{ item.title }}</span>
+                <mat-icon class="expand-icon">{{ item.expanded ? 'expand_less' : 'expand_more' }}</mat-icon>
+              </a>
+              <ul class="submenu" [class.expanded]="item.expanded">
+                <ng-container *ngFor="let child of item.children">
+                  <li class="nav-item" *ngIf="hasRequiredRole(child.requiredRole) && isFeatureEnabled(child.featureFlag)"
+                      [class.active]="activeMenuItem === child.route">
+                    <a class="nav-link" [routerLink]="child.route">
+                      <mat-icon class="nav-icon">{{ child.icon }}</mat-icon>
+                      <span class="nav-text">{{ child.title }}</span>
+                    </a>
+                  </li>
+                </ng-container>
+              </ul>
+            </li>
+            
+            <!-- Regular menu items -->
+            <li class="nav-item" *ngIf="!item.children || item.children.length === 0" 
+                [class.active]="activeMenuItem === item.route"
+                [class.disabled]="item.disabled">
+              <a class="nav-link" [routerLink]="item.route" [class.disabled]="item.disabled">
+                <mat-icon class="nav-icon">{{ item.icon }}</mat-icon>
+                <span class="nav-text">{{ item.title }}</span>
+              </a>
+            </li>
+          </ng-container>
+        </ng-container>
+      </ul>
+    </nav>
+  </div>
+  
+  <!-- User info at bottom -->
+  <div class="sidebar-footer" *ngIf="currentUser$ | async as user">
+    <div class="user-info">
+      <div class="user-avatar" [style.background-color]="'var(--primary)'">
+        {{ user.name.charAt(0) }}
+      </div>
+      <div class="user-details" *ngIf="!collapsed">
+        <div class="user-name">{{ user.name }}</div>
+        <div class="user-role">{{ user.role | titlecase }}</div>
+      </div>
+    </div>
+  </div>
+</aside>

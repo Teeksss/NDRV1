@@ -1,0 +1,65 @@
+<header class="app-header">
+  <div class="header-left">
+    <button mat-icon-button class="toggle-sidebar-button" (click)="onToggleSidebar()">
+      <mat-icon>{{ sidebarCollapsed ? 'menu' : 'menu_open' }}</mat-icon>
+    </button>
+    <div class="app-logo">
+      <img src="assets/images/logo.svg" alt="NDR Logo" class="logo-image" />
+      <span class="logo-text" *ngIf="!sidebarCollapsed">NDR Korelasyon Motoru</span>
+    </div>
+  </div>
+  
+  <div class="header-center">
+    <div class="search-container">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-icon matPrefix>search</mat-icon>
+        <input matInput placeholder="Search..." />
+      </mat-form-field>
+    </div>
+  </div>
+  
+  <div class="header-right">
+    <!-- Connection status indicator -->
+    <div class="connection-status" [class.connected]="isConnected" [class.disconnected]="!isConnected">
+      <mat-icon>{{ isConnected ? 'wifi' : 'wifi_off' }}</mat-icon>
+      <span class="connection-status-text">{{ isConnected ? 'Connected' : 'Disconnected' }}</span>
+    </div>
+    
+    <!-- Theme toggle -->
+    <button mat-icon-button class="theme-toggle-button" (click)="onToggleTheme()" matTooltip="Toggle theme">
+      <mat-icon>{{ isDarkTheme ? 'light_mode' : 'dark_mode' }}</mat-icon>
+    </button>
+    
+    <!-- Notifications -->
+    <button mat-icon-button class="notifications-button" [matBadge]="notificationCount" 
+            [matBadgeHidden]="notificationCount === 0" matBadgeColor="accent"
+            (click)="goToNotifications()" matTooltip="Notifications">
+      <mat-icon>notifications</mat-icon>
+    </button>
+    
+    <!-- User menu -->
+    <button mat-button [matMenuTriggerFor]="userMenu" class="user-button">
+      <ng-container *ngIf="currentUser$ | async as user">
+        <div class="user-avatar" [attr.data-initials]="getUserInitials(user)"></div>
+        <span class="user-name">{{ user.name }}</span>
+      </ng-container>
+      <mat-icon>arrow_drop_down</mat-icon>
+    </button>
+    
+    <mat-menu #userMenu="matMenu" xPosition="before">
+      <button mat-menu-item (click)="goToProfile()">
+        <mat-icon>person</mat-icon>
+        <span>Profile</span>
+      </button>
+      <button mat-menu-item>
+        <mat-icon>settings</mat-icon>
+        <span>Settings</span>
+      </button>
+      <mat-divider></mat-divider>
+      <button mat-menu-item (click)="logout()">
+        <mat-icon>exit_to_app</mat-icon>
+        <span>Log out</span>
+      </button>
+    </mat-menu>
+  </div>
+</header>

@@ -1,0 +1,56 @@
+.not-found-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+  text-align: center;
+  padding: 20px;
+}
+
+.not-found-content {
+  max-width: 500px;
+}
+
+.error-code {
+  font-size: 120px;
+  font-weight: 700;
+  color: var(--primary);
+  line-height: 1;
+  margin-bottom: 16px;
+}
+
+.error-title {
+  font-size: 32px;
+  margin-bottom: 16px;
+}
+
+.error-message {
+  font-size: 18px;
+  color: var(--text-secondary);
+  margin-bottom: 32px;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+@media (max-width: 576px) {
+  .error-code {
+    font-size: 80px;
+  }
+  
+  .error-title {
+    font-size: 24px;
+  }
+  
+  .error-message {
+    font-size: 16px;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+}

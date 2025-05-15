@@ -1,0 +1,37 @@
+<h2 mat-dialog-title>{{ data.title }}</h2>
+<form [formGroup]="tagForm" (ngSubmit)="onSubmit()">
+  <mat-dialog-content>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Tag</mat-label>
+      <input matInput formControlName="tag" placeholder="Enter tag name">
+      <mat-hint>Use only letters, numbers, underscores, and hyphens</mat-hint>
+      <mat-error *ngIf="tagForm.get('tag').hasError('required')">
+        Tag is required
+      </mat-error>
+      <mat-error *ngIf="tagForm.get('tag').hasError('pattern')">
+        Invalid characters in tag
+      </mat-error>
+    </mat-form-field>
+    
+    <div *ngIf="tagExists()" class="tag-exists-warning">
+      <mat-icon>warning</mat-icon>
+      <span>This tag already exists</span>
+    </div>
+    
+    <div class="suggested-tags" *ngIf="filteredSuggestedTags.length > 0">
+      <h3>Suggested Tags</h3>
+      <div class="tag-chips">
+        <mat-chip-list>
+          <mat-chip *ngFor="let tag of filteredSuggestedTags" (click)="selectTag(tag)" color="primary" selected>
+            {{ tag }}
+          </mat-chip>
+        </mat-chip-list>
+      </div>
+    </div>
+  </mat-dialog-content>
+  
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" (click)="onCancel()">Cancel</button>
+    <button mat-raised-button color="primary" type="submit" [disabled]="tagForm.invalid || tagExists()">Add</button>
+  </mat-dialog-actions>
+</form>

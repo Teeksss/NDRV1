@@ -1,0 +1,255 @@
+@use '@angular/material' as mat;
+@include mat.core();
+
+// Define the palettes for light and dark themes
+// Custom purple primary palette
+$ndr-primary: (
+  50: #f2e7fe,
+  100: #dbb2ff,
+  200: #bb86fc,
+  300: #9e69fd,
+  400: #7c4dff,
+  500: #651fff,
+  600: #5e17eb,
+  700: #5012d0,
+  800: #4211b8,
+  900: #3700b3,
+  contrast: (
+    50: rgba(0, 0, 0, 0.87),
+    100: rgba(0, 0, 0, 0.87),
+    200: rgba(0, 0, 0, 0.87),
+    300: rgba(0, 0, 0, 0.87),
+    400: white,
+    500: white,
+    600: white,
+    700: white,
+    800: white,
+    900: white,
+  )
+);
+
+// Custom teal accent palette
+$ndr-accent: (
+  50: #e4f7fb,
+  100: #b8eaf4,
+  200: #89deed,
+  300: #61d3e6,
+  400: #42c9e0,
+  500: #03dac6,
+  600: #21c0c0,
+  700: #17b3b3,
+  800: #0ea7a7,
+  900: #00918f,
+  contrast: (
+    50: rgba(0, 0, 0, 0.87),
+    100: rgba(0, 0, 0, 0.87),
+    200: rgba(0, 0, 0, 0.87),
+    300: rgba(0, 0, 0, 0.87),
+    400: rgba(0, 0, 0, 0.87),
+    500: rgba(0, 0, 0, 0.87),
+    600: rgba(0, 0, 0, 0.87),
+    700: white,
+    800: white,
+    900: white,
+  )
+);
+
+// Custom error palette with crimson red
+$ndr-error: (
+  50: #fee7e9,
+  100: #fcc3c8,
+  200: #f99da5,
+  300: #f57783,
+  400: #f45b69,
+  500: #f44336,
+  600: #ef3c45,
+  700: #e93442,
+  800: #e32c3b,
+  900: #cf1d31,
+  contrast: (
+    50: rgba(0, 0, 0, 0.87),
+    100: rgba(0, 0, 0, 0.87),
+    200: rgba(0, 0, 0, 0.87),
+    300: rgba(0, 0, 0, 0.87),
+    400: white,
+    500: white,
+    600: white,
+    700: white,
+    800: white,
+    900: white,
+  )
+);
+
+// Create the light theme
+$ndr-light-primary: mat.define-palette($ndr-primary, 500);
+$ndr-light-accent: mat.define-palette($ndr-accent, 500);
+$ndr-light-warn: mat.define-palette($ndr-error, 500);
+
+$ndr-light-theme: mat.define-light-theme((
+  color: (
+    primary: $ndr-light-primary,
+    accent: $ndr-light-accent,
+    warn: $ndr-light-warn,
+  ),
+  typography: mat.define-typography-config(),
+  density: 0,
+));
+
+// Create the dark theme
+$ndr-dark-primary: mat.define-palette($ndr-primary, 200);
+$ndr-dark-accent: mat.define-palette($ndr-accent, 200);
+$ndr-dark-warn: mat.define-palette($ndr-error, 500);
+
+$ndr-dark-theme: mat.define-dark-theme((
+  color: (
+    primary: $ndr-dark-primary,
+    accent: $ndr-dark-accent,
+    warn: $ndr-dark-warn,
+  ),
+  typography: mat.define-typography-config(),
+  density: 0,
+));
+
+// Theme mixins
+@mixin theme-colors($theme) {
+  $color-config: mat.get-color-config($theme);
+  $is-dark-theme: map-get($color-config, 'is-dark');
+  $primary: map-get($color-config, 'primary');
+  $accent: map-get($color-config, 'accent');
+  $warn: map-get($color-config, 'warn');
+  $background: map-get($theme, 'background');
+  $foreground: map-get($theme, 'foreground');
+  
+  $background-color: mat.get-color-from-palette($background, 'background');
+  $card-color: mat.get-color-from-palette($background, 'card');
+  $text-color: mat.get-color-from-palette($foreground, 'text');
+  $secondary-text-color: mat.get-color-from-palette($foreground, 'secondary-text');
+  $border-color: mat.get-color-from-palette($foreground, 'divider');
+  
+  // Root variables
+  :root {
+    --primary: #{mat.get-color-from-palette($primary, 500)};
+    --primary-lighter: #{mat.get-color-from-palette($primary, 100)};
+    --primary-darker: #{mat.get-color-from-palette($primary, 700)};
+    --accent: #{mat.get-color-from-palette($accent, 500)};
+    --accent-lighter: #{mat.get-color-from-palette($accent, 100)};
+    --accent-darker: #{mat.get-color-from-palette($accent, 700)};
+    --warn: #{mat.get-color-from-palette($warn, 500)};
+    --background: #{$background-color};
+    --card-background: #{$card-color};
+    --text: #{$text-color};
+    --text-secondary: #{$secondary-text-color};
+    --border: #{$border-color};
+    
+    // Severity colors
+    --severity-critical: #ff2d55;
+    --severity-high: #ff9500;
+    --severity-medium: #ffcc00;
+    --severity-low: #34c759;
+    --severity-info: #5ac8fa;
+    
+    // Status colors
+    --status-active: #4cd964;
+    --status-inactive: #8e8e93;
+    --status-pending: #5ac8fa;
+    --status-warning: #ffcc00;
+    --status-error: #ff3b30;
+    
+    // Chart colors
+    --chart-color-1: #{mat.get-color-from-palette($primary, 500)};
+    --chart-color-2: #{mat.get-color-from-palette($accent, 500)};
+    --chart-color-3: #{mat.get-color-from-palette($primary, 300)};
+    --chart-color-4: #{mat.get-color-from-palette($accent, 300)};
+    --chart-color-5: #{mat.get-color-from-palette($primary, 700)};
+    --chart-color-6: #{mat.get-color-from-palette($accent, 700)};
+  }
+  
+  // Theme specific overrides
+  body {
+    background-color: $background-color;
+    color: $text-color;
+  }
+  
+  .mat-card {
+    background-color: $card-color;
+  }
+  
+  // Custom severity classes
+  .severity-critical {
+    color: var(--severity-critical);
+  }
+  
+  .severity-high {
+    color: var(--severity-high);
+  }
+  
+  .severity-medium {
+    color: var(--severity-medium);
+  }
+  
+  .severity-low {
+    color: var(--severity-low);
+  }
+  
+  .severity-info {
+    color: var(--severity-info);
+  }
+  
+  // Status badges
+  .status-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    
+    &.status-active {
+      background-color: rgba(76, 217, 100, 0.2);
+      color: var(--status-active);
+    }
+    
+    &.status-inactive {
+      background-color: rgba(142, 142, 147, 0.2);
+      color: var(--status-inactive);
+    }
+    
+    &.status-pending {
+      background-color: rgba(90, 200, 250, 0.2);
+      color: var(--status-pending);
+    }
+    
+    &.status-warning {
+      background-color: rgba(255, 204, 0, 0.2);
+      color: var(--status-warning);
+    }
+    
+    &.status-error {
+      background-color: rgba(255, 59, 48, 0.2);
+      color: var(--status-error);
+    }
+  }
+}
+
+// Apply the light theme by default
+@include mat.all-component-themes($ndr-light-theme);
+@include theme-colors($ndr-light-theme);
+
+// Apply the dark theme if the user prefers it
+@media (prefers-color-scheme: dark) {
+  .theme-auto {
+    @include mat.all-component-colors($ndr-dark-theme);
+    @include theme-colors($ndr-dark-theme);
+  }
+}
+
+// Light theme class
+.theme-light {
+  @include mat.all-component-colors($ndr-light-theme);
+  @include theme-colors($ndr-light-theme);
+}
+
+// Dark theme class
+.theme-dark {
+  @include mat.all-component-colors($ndr-dark-theme);
+  @include theme-colors($ndr-dark-theme);
+}

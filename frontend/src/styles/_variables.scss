@@ -1,0 +1,78 @@
+// Primary custom variables
+$font-family-base: 'Roboto', 'Helvetica Neue', sans-serif;
+$font-size-base: 16px;
+$line-height-base: 1.5;
+
+// Spacing variables
+$spacer: 1rem;
+$spacers: (
+  0: 0,
+  1: ($spacer * 0.25),
+  2: ($spacer * 0.5),
+  3: $spacer,
+  4: ($spacer * 1.5),
+  5: ($spacer * 3)
+);
+
+// Breakpoints
+$breakpoints: (
+  xs: 0,
+  sm: 576px,
+  md: 768px,
+  lg: 992px,
+  xl: 1200px
+);
+
+// Grid variables
+$grid-columns: 12;
+$grid-gutter-width: 30px;
+$grid-breakpoints: $breakpoints;
+
+// Container max widths
+$container-max-widths: (
+  sm: 540px,
+  md: 720px,
+  lg: 960px,
+  xl: 1140px
+);
+
+// Common component variables
+$border-radius: 4px;
+$border-radius-sm: 2px;
+$border-radius-lg: 8px;
+$transition-base: all 0.15s ease-in-out;
+
+// Z-index values
+$z-index-dropdown: 1000;
+$z-index-sticky: 1020;
+$z-index-fixed: 1030;
+$z-index-modal-backdrop: 1040;
+$z-index-modal: 1050;
+$z-index-popover: 1060;
+$z-index-tooltip: 1070;
+
+// Custom theme variables (for components not using Material)
+:root {
+  --transition-base: #{$transition-base};
+  --border-radius: #{$border-radius};
+
+  // App layout
+  --sidebar-width: 240px;
+  --collapsed-sidebar-width: 68px;
+  --header-height: 64px;
+  --footer-height: 50px;
+  
+  // Card shadows
+  --card-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --card-hover-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  
+  // Dashboard variables
+  --widget-min-height: 200px;
+  --widget-header-height: 42px;
+  --widget-border-radius: 8px;
+  
+  // Animation durations
+  --animation-fast: 0.15s;
+  --animation-normal: 0.3s;
+  --animation-slow: 0.5s;
+}

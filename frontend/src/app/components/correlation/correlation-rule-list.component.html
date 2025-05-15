@@ -1,0 +1,256 @@
+<div class="correlation-rules-container">
+  <div class="content-header">
+    <h1>Correlation Rules</h1>
+    <div class="actions">
+      <button mat-raised-button color="primary" (click)="createRule()">
+        <mat-icon>add</mat-icon> Create Rule
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-container">
+    <div class="search-container">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Search rules</mat-label>
+        <input matInput type="text" (keyup)="applySearchFilter($event)" [value]="filterParams.name" placeholder="Search by name...">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+    </div>
+    
+    <div class="quick-filters">
+      <!-- Type filters -->
+      <div class="type-filters">
+        <span class="filter-label">Type:</span>
+        <div class="filter-buttons">
+          <button class="filter-btn type-simple" 
+                  [class.active]="filterParams.type.includes('simple')"
+                  (click)="applyQuickFilter('type', 'simple')">
+            Simple
+          </button>
+          <button class="filter-btn type-threshold" 
+                  [class.active]="filterParams.type.includes('threshold')"
+                  (click)="applyQuickFilter('type', 'threshold')">
+            Threshold
+          </button>
+          <button class="filter-btn type-sequence" 
+                  [class.active]="filterParams.type.includes('sequence')"
+                  (click)="applyQuickFilter('type', 'sequence')">
+            Sequence
+          </button>
+          <button class="filter-btn type-aggregation" 
+                  [class.active]="filterParams.type.includes('aggregation')"
+                  (click)="applyQuickFilter('type', 'aggregation')">
+            Aggregation
+          </button>
+          <button class="filter-btn type-pattern" 
+                  [class.active]="filterParams.type.includes('pattern')"
+                  (click)="applyQuickFilter('type', 'pattern')">
+            Pattern
+          </button>
+        </div>
+      </div>
+      
+      <!-- Severity filters -->
+      <div class="severity-filters">
+        <span class="filter-label">Severity:</span>
+        <div class="filter-buttons">
+          <button class="filter-btn severity-critical" 
+                  [class.active]="filterParams.severity.includes('critical')"
+                  (click)="applyQuickFilter('severity', 'critical')">
+            Critical
+          </button>
+          <button class="filter-btn severity-high" 
+                  [class.active]="filterParams.severity.includes('high')"
+                  (click)="applyQuickFilter('severity', 'high')">
+            High
+          </button>
+          <button class="filter-btn severity-medium" 
+                  [class.active]="filterParams.severity.includes('medium')"
+                  (click)="applyQuickFilter('severity', 'medium')">
+            Medium
+          </button>
+          <button class="filter-btn severity-low" 
+                  [class.active]="filterParams.severity.includes('low')"
+                  (click)="applyQuickFilter('severity', 'low')">
+            Low
+          </button>
+        </div>
+      </div>
+      
+      <!-- Status filters -->
+      <div class="status-filters">
+        <span class="filter-label">Status:</span>
+        <div class="filter-buttons">
+          <button class="filter-btn status-enabled" 
+                  [class.active]="filterParams.enabled === true"
+                  (click)="applyQuickFilter('enabled', true)">
+            Enabled
+          </button>
+          <button class="filter-btn status-disabled" 
+                  [class.active]="filterParams.enabled === false"
+                  (click)="applyQuickFilter('enabled', false)">
+            Disabled
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Active filters display -->
+    <div class="active-filters" *ngIf="activeFilters.length > 0">
+      <span class="active-filters-label">Active filters:</span>
+      <div class="active-filter-tags">
+        <span class="filter-tag" *ngFor="let filter of activeFilters">
+          {{ filter }}
+        </span>
+        <button class="clear-filters-btn" (click)="clearFilters()">
+          Clear all filters
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rules table -->
+  <div class="rules-table-container">
+    <!-- Loading state -->
+    <div class="loading-overlay" *ngIf="isLoading">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+    
+    <!-- Error state -->
+    <div class="error-container" *ngIf="error">
+      <div class="error-message">
+        <i class="fa fa-exclamation-triangle"></i>
+        <p>{{ error }}</p>
+      </div>
+      <button mat-raised-button color="primary" (click)="loadRules()">Try Again</button>
+    </div>
+    
+    <!-- Empty state -->
+    <div class="empty-state" *ngIf="dataSource.data.length === 0 && !isLoading && !error">
+      <div class="empty-icon">
+        <mat-icon>rule</mat-icon>
+      </div>
+      <h3>No correlation rules found</h3>
+      <p>There are no rules matching your current filters</p>
+      <div class="empty-actions">
+        <button mat-raised-button color="primary" (click)="createRule()">
+          Create New Rule
+        </button>
+        <button mat-stroked-button color="primary" (click)="clearFilters()" *ngIf="activeFilters.length > 0">
+          Clear Filters
+        </button>
+      </div>
+    </div>
+    
+    <!-- Table -->
+    <table mat-table [dataSource]="dataSource" matSort (matSortChange)="loadRules()" 
+           *ngIf="dataSource.data.length > 0 && !error" class="rules-table">
+      
+      <!-- Name Column -->
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+        <td mat-cell *matCellDef="let rule">
+          <div class="rule-name">{{ rule.name }}</div>
+          <div class="rule-description" *ngIf="rule.description">{{ truncate(rule.description, 80) }}</div>
+        </td>
+      </ng-container>
+      
+      <!-- Type Column -->
+      <ng-container matColumnDef="type">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Type</th>
+        <td mat-cell *matCellDef="let rule">
+          <span class="type-badge type-{{ rule.type }}">
+            {{ rule.type | titlecase }}
+          </span>
+        </td>
+      </ng-container>
+      
+      <!-- Severity Column -->
+      <ng-container matColumnDef="severity">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Severity</th>
+        <td mat-cell *matCellDef="let rule" [ngClass]="getSeverityClass(rule.severity)">
+          <div class="severity-indicator">
+            <span class="severity-dot"></span>
+            <span class="severity-text">{{ rule.severity | titlecase }}</span>
+          </div>
+        </td>
+      </ng-container>
+      
+      <!-- Enabled Column -->
+      <ng-container matColumnDef="enabled">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+        <td mat-cell *matCellDef="let rule">
+          <mat-slide-toggle
+            [checked]="rule.enabled"
+            (change)="toggleRuleStatus(rule, $event)"
+            (click)="$event.stopPropagation()">
+            {{ rule.enabled ? 'Enabled' : 'Disabled' }}
+          </mat-slide-toggle>
+        </td>
+      </ng-container>
+      
+      <!-- Trigger Count Column -->
+      <ng-container matColumnDef="triggerCount">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Triggers</th>
+        <td mat-cell *matCellDef="let rule">
+          {{ rule.triggerCount || 0 }}
+        </td>
+      </ng-container>
+      
+      <!-- Last Triggered Column -->
+      <ng-container matColumnDef="lastTriggeredAt">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Last Triggered</th>
+        <td mat-cell *matCellDef="let rule">
+          {{ formatDate(rule.lastTriggeredAt) }}
+        </td>
+      </ng-container>
+      
+      <!-- Actions Column -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let rule">
+          <div class="action-buttons">
+            <button mat-icon-button [matMenuTriggerFor]="actionMenu" aria-label="Actions"
+                    (click)="$event.stopPropagation()">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #actionMenu="matMenu">
+              <button mat-menu-item (click)="viewRule(rule)">
+                <mat-icon>visibility</mat-icon>
+                <span>View Details</span>
+              </button>
+              <button mat-menu-item (click)="editRule(rule, $event)">
+                <mat-icon>edit</mat-icon>
+                <span>Edit Rule</span>
+              </button>
+              <button mat-menu-item (click)="toggleRuleStatus(rule, $event)">
+                <mat-icon>{{ rule.enabled ? 'toggle_off' : 'toggle_on' }}</mat-icon>
+                <span>{{ rule.enabled ? 'Disable' : 'Enable' }} Rule</span>
+              </button>
+              <button mat-menu-item (click)="deleteRule(rule, $event)" class="menu-item-danger">
+                <mat-icon>delete</mat-icon>
+                <span>Delete Rule</span>
+              </button>
+            </mat-menu>
+          </div>
+        </td>
+      </ng-container>
+      
+      <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;" 
+          (click)="openRuleDetail(row)" 
+          class="rule-row">
+      </tr>
+    </table>
+    
+    <!-- Pagination -->
+    <mat-paginator 
+      [length]="totalRules"
+      [pageSize]="25"
+      [pageSizeOptions]="[10, 25, 50, 100]"
+      (page)="onPageChange($event)"
+      *ngIf="dataSource.data.length > 0 && !error">
+    </mat-paginator>
+  </div>
+</div>

@@ -1,0 +1,145 @@
+@import '../../../styles/variables';
+
+.app-header {
+  height: var(--header-height);
+  background-color: var(--card-background);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  position: sticky;
+  top: 0;
+  z-index: $z-index-fixed;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+}
+
+.header-center {
+  flex: 1;
+  margin: 0 24px;
+  max-width: 600px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.app-logo {
+  display: flex;
+  align-items: center;
+  margin-left: 8px;
+}
+
+.logo-image {
+  height: 32px;
+  width: auto;
+}
+
+.logo-text {
+  margin-left: 8px;
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: var(--primary);
+}
+
+.search-container {
+  width: 100%;
+}
+
+.search-field {
+  width: 100%;
+  font-size: 0.9rem;
+}
+
+::ng-deep .search-field .mat-form-field-wrapper {
+  padding-bottom: 0;
+  margin: 0;
+}
+
+::ng-deep .search-field .mat-form-field-infix {
+  padding: 0.5em 0;
+  border-top: 0;
+}
+
+.user-button {
+  display: flex;
+  align-items: center;
+  margin-left: 8px;
+  padding: 0 8px;
+  height: 40px;
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+  margin-right: 8px;
+  position: relative;
+  
+  &::after {
+    content: attr(data-initials);
+    position: absolute;
+  }
+}
+
+.user-name {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.connection-status {
+  display: flex;
+  align-items: center;
+  font-size: 0.8rem;
+  padding: 4px 8px;
+  border-radius: 16px;
+  
+  &.connected {
+    color: var(--status-active);
+  }
+  
+  &.disconnected {
+    color: var(--status-error);
+  }
+  
+  .connection-status-text {
+    margin-left: 4px;
+    display: none;
+  }
+  
+  &:hover .connection-status-text {
+    display: inline;
+  }
+}
+
+// Media queries for responsive design
+@media (max-width: 768px) {
+  .header-center {
+    display: none;
+  }
+  
+  .user-name {
+    display: none;
+  }
+}
+
+@media (max-width: 576px) {
+  .logo-text {
+    display: none;
+  }
+}

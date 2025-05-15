@@ -1,0 +1,575 @@
+openapi: 3.0.3
+info:
+  title: NDR Korelasyon Motoru API - Correlation Rules
+  description: API endpoints for correlation rules management
+  version: 1.0.0
+paths:
+  /correlation/rules:
+    get:
+      summary: Get all correlation rules
+      description: Retrieves a paginated list of correlation rules with optional filters
+      tags:
+        - Correlation
+      parameters:
+        - name: name
+          in: query
+          description: Filter by rule name
+          schema:
+            type: string
+        - name: type
+          in: query
+          description: Filter by rule type
+          schema:
+            type: array
+            items:
+              type: string
+              enum: [simple, threshold, sequence, aggregation, pattern]
+        - name: severity
+          in: query
+          description: Filter by severity
+          schema:
+            type: array
+            items:
+              type: string
+              enum: [critical, high, medium, low, info]
+        - name: enabled
+          in: query
+          description: Filter by enabled status
+          schema:
+            type: boolean
+        - name: tags
+          in: query
+          description: Filter by tags
+          schema:
+            type: array
+            items:
+              type: string
+        - name: page
+          in: query
+          description: Page number (1-based)
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          description: Items per page
+          schema:
+            type: integer
+            default: 25
+        - name: sort
+          in: query
+          description: Field to sort by
+          schema:
+            type: string
+            default: name
+        - name: order
+          in: query
+          description: Sort order
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: asc
+      responses:
+        '200':
+          description: List of correlation rules
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CorrelationRule'
+                  total:
+                    type: integer
+                  page:
+                    type: integer
+                  limit:
+                    type: integer
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+    post:
+      summary: Create new correlation rule
+      description: Creates a new correlation rule
+      tags:
+        - Correlation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCorrelationRuleDto'
+      responses:
+        '201':
+          description: Correlation rule created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CorrelationRule'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+  /correlation/rules/{id}:
+    get:
+      summary: Get correlation rule by ID
+      description: Retrieves a correlation rule by its ID
+      tags:
+        - Correlation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Correlation Rule ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Correlation rule details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CorrelationRule'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Correlation rule not found
+        '500':
+          description: Internal server error
+    put:
+      summary: Update correlation rule
+      description: Updates an existing correlation rule
+      tags:
+        - Correlation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Correlation Rule ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCorrelationRuleDto'
+      responses:
+        '200':
+          description: Correlation rule updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CorrelationRule'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '404':
+          description: Correlation rule not found
+        '500':
+          description: Internal server error
+    patch:
+      summary: Partially update correlation rule
+      description: Partially updates an existing correlation rule
+      tags:
+        - Correlation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Correlation Rule ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchCorrelationRuleDto'
+      responses:
+        '200':
+          description: Correlation rule updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CorrelationRule'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '404':
+          description: Correlation rule not found
+        '500':
+          description: Internal server error
+    delete:
+      summary: Delete correlation rule
+      description: Deletes a correlation rule
+      tags:
+        - Correlation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Correlation Rule ID
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Correlation rule deleted successfully
+        '401':
+          description: Unauthorized
+        '404':
+          description: Correlation rule not found
+        '500':
+          description: Internal server error
+  /correlation/rules/{id}/enable:
+    patch:
+      summary: Enable correlation rule
+      description: Enables a correlation rule
+      tags:
+        - Correlation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Correlation Rule ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Correlation rule enabled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CorrelationRule'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Correlation rule not found
+        '500':
+          description: Internal server error
+  /correlation/rules/{id}/disable:
+    patch:
+      summary: Disable correlation rule
+      description: Disables a correlation rule
+      tags:
+        - Correlation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Correlation Rule ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Correlation rule disabled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CorrelationRule'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Correlation rule not found
+        '500':
+          description: Internal server error
+  /correlation/rules/{id}/test:
+    post:
+      summary: Test correlation rule
+      description: Tests a correlation rule against sample events
+      tags:
+        - Correlation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Correlation Rule ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                events:
+                  type: array
+                  items:
+                    type: object
+                    additionalProperties: true
+              required:
+                - events
+      responses:
+        '200':
+          description: Test results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  matched:
+                    type: boolean
+                  details:
+                    type: object
+                  executionTime:
+                    type: number
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '404':
+          description: Correlation rule not found
+        '500':
+          description: Internal server error
+  /correlation/rules/statistics:
+    get:
+      summary: Get correlation rule statistics
+      description: Retrieves statistics about correlation rules
+      tags:
+        - Correlation
+      responses:
+        '200':
+          description: Correlation rule statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                  enabled:
+                    type: integer
+                  byType:
+                    type: object
+                    additionalProperties:
+                      type: integer
+                  bySeverity:
+                    type: object
+                    additionalProperties:
+                      type: integer
+                  topTriggered:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        triggerCount:
+                          type: integer
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+components:
+  schemas:
+    CorrelationRule:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+          enum: [simple, threshold, sequence, aggregation, pattern]
+        severity:
+          type: string
+          enum: [critical, high, medium, low, info]
+        enabled:
+          type: boolean
+        conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/RuleCondition'
+        config:
+          type: object
+        alertTemplate:
+          type: object
+          properties:
+            title:
+              type: string
+            description:
+              type: string
+        mitre:
+          type: object
+          properties:
+            tactic:
+              type: string
+            technique:
+              type: string
+        tags:
+          type: array
+          items:
+            type: string
+        createdBy:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        lastTriggeredAt:
+          type: string
+          format: date-time
+        triggerCount:
+          type: integer
+    RuleCondition:
+      type: object
+      properties:
+        logicalOperator:
+          type: string
+          enum: [and, or]
+        field:
+          type: string
+        operator:
+          type: string
+          enum: [eq, neq, gt, gte, lt, lte, in, nin, contains, notContains, startsWith, endsWith, match, exists, notExists]
+        value:
+          oneOf:
+            - type: string
+            - type: number
+            - type: boolean
+            - type: array
+            - type: object
+        conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/RuleCondition'
+    CreateCorrelationRuleDto:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+          enum: [simple, threshold, sequence, aggregation, pattern]
+        severity:
+          type: string
+          enum: [critical, high, medium, low, info]
+        enabled:
+          type: boolean
+          default: true
+        conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/RuleCondition'
+        config:
+          type: object
+        alertTemplate:
+          type: object
+          properties:
+            title:
+              type: string
+            description:
+              type: string
+        mitre:
+          type: object
+          properties:
+            tactic:
+              type: string
+            technique:
+              type: string
+        tags:
+          type: array
+          items:
+            type: string
+      required:
+        - name
+        - type
+        - severity
+        - conditions
+    UpdateCorrelationRuleDto:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+          enum: [simple, threshold, sequence, aggregation, pattern]
+        severity:
+          type: string
+          enum: [critical, high, medium, low, info]
+        enabled:
+          type: boolean
+        conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/RuleCondition'
+        config:
+          type: object
+        alertTemplate:
+          type: object
+          properties:
+            title:
+              type: string
+            description:
+              type: string
+        mitre:
+          type: object
+          properties:
+            tactic:
+              type: string
+            technique:
+              type: string
+        tags:
+          type: array
+          items:
+            type: string
+      required:
+        - name
+        - type
+        - severity
+        - conditions
+    PatchCorrelationRuleDto:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        severity:
+          type: string
+          enum: [critical, high, medium, low, info]
+        enabled:
+          type: boolean
+        conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/RuleCondition'
+        config:
+          type: object
+        alertTemplate:
+          type: object
+          properties:
+            title:
+              type: string
+            description:
+              type: string
+        mitre:
+          type: object
+          properties:
+            tactic:
+              type: string
+            technique:
+              type: string
+        tags:
+          type: array
+          items:
+            type: string

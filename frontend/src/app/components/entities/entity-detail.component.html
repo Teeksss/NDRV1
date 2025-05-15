@@ -1,0 +1,471 @@
+<div class="entity-detail-container" *ngIf="entity">
+  <div class="entity-header">
+    <div class="entity-title-row">
+      <div class="back-button">
+        <button mat-icon-button [routerLink]="['/entities']">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+      </div>
+      
+      <div class="entity-title">
+        <h1>{{ entity.name }}</h1>
+        <div class="entity-subtitle">
+          <span class="entity-type">{{ entity.type | titlecase }}</span>
+          <span class="entity-status status-{{ entity.status }}">{{ entity.status | titlecase }}</span>
+        </div>
+      </div>
+      
+      <div class="entity-actions">
+        <button mat-icon-button [matMenuTriggerFor]="actionMenu">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+        <mat-menu #actionMenu="matMenu">
+          <button mat-menu-item (click)="toggleEditMode()">
+            <mat-icon>edit</mat-icon>
+            <span>{{ isEditMode ? 'Cancel Edit' : 'Edit Entity' }}</span>
+          </button>
+          <button mat-menu-item *ngIf="!isEditMode" (click)="addTag()">
+            <mat-icon>label</mat-icon>
+            <span>Add Tag</span>
+          </button>
+          <button mat-menu-item *ngIf="!isEditMode" [routerLink]="['/scan', 'new']" [queryParams]="{targetId: entity.id}">
+            <mat-icon>security</mat-icon>
+            <span>Scan Entity</span>
+          </button>
+          <button mat-menu-item *ngIf="!isEditMode" [routerLink]="['/reports', 'new']" [queryParams]="{entityId: entity.id}">
+            <mat-icon>assessment</mat-icon>
+            <span>Generate Report</span>
+          </button>
+        </mat-menu>
+      </div>
+    </div>
+    
+    <!-- Edit form -->
+    <div class="entity-edit-form" *ngIf="isEditMode">
+      <form [formGroup]="editForm" (ngSubmit)="saveChanges()">
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Name</mat-label>
+            <input matInput formControlName="name" required>
+            <mat-error *ngIf="editForm.get('name').invalid">Name is required</mat-error>
+          </mat-form-field>
+          
+          <mat-form-field appearance="outline">
+            <mat-label>Type</mat-label>
+            <mat-select formControlName="type" required>
+              <mat-option value="server">Server</mat-option>
+              <mat-option value="workstation">Workstation</mat-option>
+              <mat-option value="network_device">Network Device</mat-option>
+              <mat-option value="security_device">Security Device</mat-option>
+              <mat-option value="iot_device">IoT Device</mat-option>
+              <mat-option value="other">Other</mat-option>
+            </mat-select>
+            <mat-error *ngIf="editForm.get('type').invalid">Type is required</mat-error>
+          </mat-form-field>
+          
+          <mat-form-field appearance="outline">
+            <mat-label>Status</mat-label>
+            <mat-select formControlName="status">
+              <mat-option value="active">Active</mat-option>
+              <mat-option value="inactive">Inactive</mat-option>
+              <mat-option value="maintenance">Maintenance</mat-option>
+              <mat-option value="compromised">Compromised</mat-option>
+              <mat-option value="unknown">Unknown</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>IP Address</mat-label>
+            <input matInput formControlName="ipAddress">
+          </mat-form-field>
+          
+          <mat-form-field appearance="outline">
+            <mat-label>MAC Address</mat-label>
+            <input matInput formControlName="macAddress">
+          </mat-form-field>
+          
+          <mat-form-field appearance="outline">
+            <mat-label>Hostname</mat-label>
+            <input matInput formControlName="hostname">
+          </mat-form-field>
+        </div>
+        
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Operating System</mat-label>
+            <input matInput formControlName="operatingSystem">
+          </mat-form-field>
+          
+          <mat-form-field appearance="outline">
+            <mat-label>OS Version</mat-label>
+            <input matInput formControlName="osVersion">
+          </mat-form-field>
+          
+          <mat-form-field appearance="outline">
+            <mat-label>Risk Score (0-100)</mat-label>
+            <input matInput type="number" min="0" max="100" formControlName="riskScore">
+          </mat-form-field>
+        </div>
+        
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Description</mat-label>
+          <textarea matInput formControlName="description" rows="3"></textarea>
+        </mat-form-field>
+        
+        <div class="form-actions">
+          <button mat-button type="button" (click)="toggleEditMode()">Cancel</button>
+          <button mat-raised-button color="primary" type="submit" [disabled]="editForm.invalid">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  
+  <!-- Entity Key Information -->
+  <div class="entity-key-info" *ngIf="!isEditMode">
+    <div class="info-card">
+      <div class="info-card-header">
+        <mat-icon>security</mat-icon>
+        <span>Risk Score</span>
+      </div>
+      <div class="info-card-content">
+        <div class="risk-score-display" [ngClass]="getRiskScoreColor(entity.riskScore)">
+          <div class="risk-score-value">{{ entity.riskScore || 0 }}</div>
+          <div class="risk-score-label">{{ entity.riskScore >= 80 ? 'Critical' : entity.riskScore >= 60 ? 'High' : entity.riskScore >= 40 ? 'Medium' : entity.riskScore >= 20 ? 'Low' : 'None' }}</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="info-card">
+      <div class="info-card-header">
+        <mat-icon>notification_important</mat-icon>
+        <span>Alerts</span>
+      </div>
+      <div class="info-card-content">
+        <div class="alerts-summary">
+          <div class="alerts-count">{{ recentAlerts.length }}</div>
+          <div class="alerts-label">Recent Alerts</div>
+        </div>
+      </div>
+      <div class="info-card-footer">
+        <button mat-button color="primary" (click)="viewAllAlerts()">View All</button>
+      </div>
+    </div>
+    
+    <div class="info-card">
+      <div class="info-card-header">
+        <mat-icon>event</mat-icon>
+        <span>Events</span>
+      </div>
+      <div class="info-card-content">
+        <div class="events-summary">
+          <div class="events-count">{{ recentEvents.length }}</div>
+          <div class="events-label">Recent Events</div>
+        </div>
+      </div>
+      <div class="info-card-footer">
+        <button mat-button color="primary" (click)="viewAllEvents()">View All</button>
+      </div>
+    </div>
+    
+    <div class="info-card">
+      <div class="info-card-header">
+        <mat-icon>bug_report</mat-icon>
+        <span>Vulnerabilities</span>
+      </div>
+      <div class="info-card-content">
+        <div class="vulnerabilities-summary">
+          <div class="vuln-count">{{ entity.vulnerabilities?.length || 0 }}</div>
+          <div class="vuln-label">Open Vulnerabilities</div>
+        </div>
+      </div>
+      <div class="info-card-footer">
+        <button mat-button color="primary" [routerLink]="['/vulnerabilities']" [queryParams]="{ entityId: entity.id }">View All</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Entity tabs -->
+  <mat-tab-group mat-align-tabs="start" class="entity-tabs" [selectedIndex]="activeTab === 'overview' ? 0 : activeTab === 'events' ? 1 : activeTab === 'alerts' ? 2 : activeTab === 'vulnerabilities' ? 3 : 0">
+    <mat-tab label="Overview" (click)="setActiveTab('overview')">
+      <div class="tab-content overview-tab">
+        <div class="info-section">
+          <h2>Entity Information</h2>
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">IP Address</div>
+              <div class="info-value">{{ entity.ipAddress || 'Not specified' }}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">MAC Address</div>
+              <div class="info-value">{{ entity.macAddress || 'Not specified' }}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Hostname</div>
+              <div class="info-value">{{ entity.hostname || 'Not specified' }}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Operating System</div>
+              <div class="info-value">{{ entity.operatingSystem || 'Unknown' }}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">OS Version</div>
+              <div class="info-value">{{ entity.osVersion || 'Unknown' }}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">First Seen</div>
+              <div class="info-value">{{ formatDate(entity.firstSeen) }}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Last Seen</div>
+              <div class="info-value">{{ formatDate(entity.lastSeen) }}</div>
+            </div>
+          </div>
+          
+          <div class="entity-description" *ngIf="entity.description">
+            <h3>Description</h3>
+            <p>{{ entity.description }}</p>
+          </div>
+        </div>
+        
+        <div class="tags-section" *ngIf="entity.tags && entity.tags.length > 0">
+          <h2>Tags</h2>
+          <div class="entity-tags">
+            <mat-chip-list>
+              <mat-chip *ngFor="let tag of entity.tags" [removable]="true" (removed)="removeTag(tag)">
+                {{ tag }}
+                <mat-icon matChipRemove>cancel</mat-icon>
+              </mat-chip>
+              <button mat-stroked-button color="primary" class="add-tag-button" (click)="addTag()">
+                <mat-icon>add</mat-icon> Add Tag
+              </button>
+            </mat-chip-list>
+          </div>
+        </div>
+        
+        <div class="charts-section">
+          <h2>Analytics</h2>
+          <div class="charts-grid">
+            <div class="chart-container">
+              <h3>Risk Score History</h3>
+              <canvas baseChart 
+                [data]="riskHistoryChart.data"
+                [type]="riskHistoryChart.type"
+                [options]="riskHistoryChart.options">
+              </canvas>
+            </div>
+            <div class="chart-container">
+              <h3>Event Types</h3>
+              <canvas baseChart 
+                [data]="eventTypeChart.data"
+                [type]="eventTypeChart.type"
+                [options]="eventTypeChart.options">
+              </canvas>
+            </div>
+            <div class="chart-container" *ngIf="vulnerabilityChart">
+              <h3>Vulnerabilities</h3>
+              <canvas baseChart 
+                [data]="vulnerabilityChart.data"
+                [type]="vulnerabilityChart.type"
+                [options]="vulnerabilityChart.options">
+              </canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+    
+    <mat-tab label="Events" (click)="setActiveTab('events')">
+      <div class="tab-content events-tab">
+        <div class="tab-header">
+          <h2>Recent Events</h2>
+          <button mat-raised-button color="primary" (click)="viewAllEvents()">View All Events</button>
+        </div>
+        
+        <div class="loading-container" *ngIf="isLoadingEvents">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p>Loading events...</p>
+        </div>
+        
+        <div class="empty-state" *ngIf="recentEvents.length === 0 && !isLoadingEvents">
+          <mat-icon>event_busy</mat-icon>
+          <p>No events found for this entity</p>
+        </div>
+        
+        <div class="events-list" *ngIf="recentEvents.length > 0 && !isLoadingEvents">
+          <mat-card *ngFor="let event of recentEvents" class="event-card">
+            <mat-card-header>
+              <div mat-card-avatar [ngClass]="'event-icon-' + event.type"></div>
+              <mat-card-title>{{ event.type }}</mat-card-title>
+              <mat-card-subtitle>{{ formatDate(event.timestamp) }}</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <p *ngIf="event.description">{{ event.description }}</p>
+              <div class="event-details">
+                <div class="detail-item" *ngIf="event.source">
+                  <span class="detail-label">Source:</span>
+                  <span class="detail-value">{{ event.source }}</span>
+                </div>
+                <div class="detail-item" *ngIf="event.sourceIp">
+                  <span class="detail-label">Source IP:</span>
+                  <span class="detail-value">{{ event.sourceIp }}</span>
+                </div>
+                <div class="detail-item" *ngIf="event.destinationIp">
+                  <span class="detail-label">Destination IP:</span>
+                  <span class="detail-value">{{ event.destinationIp }}</span>
+                </div>
+                <div class="detail-item" *ngIf="event.protocol">
+                  <span class="detail-label">Protocol:</span>
+                  <span class="detail-value">{{ event.protocol }}</span>
+                </div>
+                <div class="detail-item" *ngIf="event.port">
+                  <span class="detail-label">Port:</span>
+                  <span class="detail-value">{{ event.port }}</span>
+                </div>
+              </div>
+            </mat-card-content>
+            <mat-card-actions>
+              <button mat-button [routerLink]="['/events', event.id]">View Details</button>
+            </mat-card-actions>
+          </mat-card>
+        </div>
+      </div>
+    </mat-tab>
+    
+    <mat-tab label="Alerts" (click)="setActiveTab('alerts')">
+      <div class="tab-content alerts-tab">
+        <div class="tab-header">
+          <h2>Recent Alerts</h2>
+          <button mat-raised-button color="primary" (click)="viewAllAlerts()">View All Alerts</button>
+        </div>
+        
+        <div class="loading-container" *ngIf="isLoadingAlerts">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p>Loading alerts...</p>
+        </div>
+        
+        <div class="empty-state" *ngIf="recentAlerts.length === 0 && !isLoadingAlerts">
+          <mat-icon>notifications_off</mat-icon>
+          <p>No alerts found for this entity</p>
+        </div>
+        
+        <div class="alerts-list" *ngIf="recentAlerts.length > 0 && !isLoadingAlerts">
+          <mat-card *ngFor="let alert of recentAlerts" class="alert-card" [ngClass]="'severity-' + alert.severity">
+            <mat-card-header>
+              <div mat-card-avatar class="severity-icon"></div>
+              <mat-card-title>{{ alert.title }}</mat-card-title>
+              <mat-card-subtitle>
+                <span class="alert-severity">{{ alert.severity | titlecase }}</span> | 
+                <span class="alert-status">{{ alert.status | titlecase }}</span> | 
+                <span class="alert-timestamp">{{ formatDate(alert.timestamp) }}</span>
+              </mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <p *ngIf="alert.description">{{ alert.description }}</p>
+              <div class="alert-details">
+                <div class="detail-item">
+                  <span class="detail-label">Source:</span>
+                  <span class="detail-value">{{ alert.source }}</span>
+                </div>
+                <div class="detail-item" *ngIf="alert.type">
+                  <span class="detail-label">Type:</span>
+                  <span class="detail-value">{{ alert.type }}</span>
+                </div>
+                <div class="detail-item" *ngIf="alert.tactic">
+                  <span class="detail-label">MITRE Tactic:</span>
+                  <span class="detail-value">{{ alert.tactic }}</span>
+                </div>
+                <div class="detail-item" *ngIf="alert.technique">
+                  <span class="detail-label">MITRE Technique:</span>
+                  <span class="detail-value">{{ alert.technique }}</span>
+                </div>
+              </div>
+            </mat-card-content>
+            <mat-card-actions>
+              <button mat-button [routerLink]="['/alerts', alert.id]">View Details</button>
+            </mat-card-actions>
+          </mat-card>
+        </div>
+      </div>
+    </mat-tab>
+    
+    <mat-tab label="Vulnerabilities" (click)="setActiveTab('vulnerabilities')">
+      <div class="tab-content vulnerabilities-tab">
+        <div class="tab-header">
+          <h2>Vulnerabilities</h2>
+          <button mat-raised-button color="primary" [routerLink]="['/scan', 'new']" [queryParams]="{targetId: entity.id}">Scan for Vulnerabilities</button>
+        </div>
+        
+        <div class="empty-state" *ngIf="!entity.vulnerabilities || entity.vulnerabilities.length === 0">
+          <mat-icon>security</mat-icon>
+          <p>No vulnerabilities found for this entity</p>
+        </div>
+        
+        <div class="vulnerabilities-list" *ngIf="entity.vulnerabilities && entity.vulnerabilities.length > 0">
+          <table mat-table [dataSource]="entity.vulnerabilities" class="vuln-table">
+            <!-- Severity Column -->
+            <ng-container matColumnDef="severity">
+              <th mat-header-cell *matHeaderCellDef>Severity</th>
+              <td mat-cell *matCellDef="let vuln" [ngClass]="'severity-' + vuln.severity">
+                <div class="severity-indicator">
+                  <span class="severity-dot"></span>
+                  <span class="severity-text">{{ vuln.severity | titlecase }}</span>
+                </div>
+              </td>
+            </ng-container>
+            
+            <!-- Name/ID Column -->
+            <ng-container matColumnDef="name">
+              <th mat-header-cell *matHeaderCellDef>Vulnerability</th>
+              <td mat-cell *matCellDef="let vuln">
+                <div class="vuln-name">{{ vuln.name }}</div>
+                <div class="vuln-id">{{ vuln.id }}</div>
+              </td>
+            </ng-container>
+            
+            <!-- Description Column -->
+            <ng-container matColumnDef="description">
+              <th mat-header-cell *matHeaderCellDef>Description</th>
+              <td mat-cell *matCellDef="let vuln">{{ vuln.description }}</td>
+            </ng-container>
+            
+            <!-- Discovery Date Column -->
+            <ng-container matColumnDef="discoveredAt">
+              <th mat-header-cell *matHeaderCellDef>Discovered</th>
+              <td mat-cell *matCellDef="let vuln">{{ formatDate(vuln.discoveredAt) }}</td>
+            </ng-container>
+            
+            <!-- Status Column -->
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef>Status</th>
+              <td mat-cell *matCellDef="let vuln">
+                <span class="status-badge" [ngClass]="vuln.patched ? 'status-patched' : 'status-open'">
+                  {{ vuln.patched ? 'Patched' : 'Open' }}
+                </span>
+              </td>
+            </ng-container>
+            
+            <tr mat-header-row *matHeaderRowDef="['severity', 'name', 'description', 'discoveredAt', 'status']"></tr>
+            <tr mat-row *matRowDef="let row; columns: ['severity', 'name', 'description', 'discoveredAt', 'status'];"></tr>
+          </table>
+        </div>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>
+
+<!-- Loading state -->
+<div class="loading-container" *ngIf="isLoading">
+  <mat-spinner diameter="50"></mat-spinner>
+  <p>Loading entity details...</p>
+</div>
+
+<!-- Error state -->
+<div class="error-container" *ngIf="error">
+  <div class="error-message">
+    <mat-icon>error</mat-icon>
+    <p>{{ error }}</p>
+  </div>
+  <button mat-raised-button color="primary" (click)="loadEntityData()">Try Again</button>
+</div>
