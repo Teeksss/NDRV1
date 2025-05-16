@@ -1,0 +1,77 @@
+// Ana stil dosyası
+@import 'variables';
+@import 'mixins';
+@import 'themes';
+@import 'components';
+
+// Global stiller
+:root {
+    --primary-color: #2196f3;
+    --secondary-color: #ff4081;
+    --background-color: #ffffff;
+    --text-color: #333333;
+    --border-color: #e0e0e0;
+    --success-color: #4caf50;
+    --warning-color: #ff9800;
+    --error-color: #f44336;
+    --font-family: 'Roboto', sans-serif;
+}
+
+// Dark tema için değişkenler
+.dark-theme {
+    --background-color: #1a1a1a;
+    --text-color: #ffffff;
+    --border-color: #404040;
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: var(--background-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+}
+
+.main-content {
+    display: flex;
+    min-height: 100vh;
+}
+
+.content-wrapper {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+// Responsive tasarım
+@media (max-width: 768px) {
+    .main-content {
+        flex-direction: column;
+    }
+
+    .content-wrapper {
+        padding: 10px;
+    }
+}
+
+// Animasyonlar
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-in;
+}
+
+// Utility sınıfları
+.flex { display: flex; }
+.flex-column { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.gap-2 { gap: 0.5rem; }
+.p-4 { padding: 1rem; }
+.m-2 { margin: 0.5rem; }
+.rounded { border-radius: 4px; }
+.shadow { box-shadow: 0 2px 4px rgba(0,0,0,0.1); }

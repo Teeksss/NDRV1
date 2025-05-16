@@ -1,155 +1,82 @@
 <div class="dashboard-container">
-  <div class="dashboard-header">
-    <h1>{{ dashboard?.name || 'Dashboard' }}</h1>
-    <div class="actions">
-      <button class="btn btn-refresh" (click)="refreshDashboard()">
-        <i class="fa fa-refresh"></i> Refresh
-      </button>
-      <button class="btn btn-primary" [matMenuTriggerFor]="addWidgetMenu">
-        <i class="fa fa-plus"></i> Add Widget
-      </button>
-      <mat-menu #addWidgetMenu="matMenu">
-        <button mat-menu-item (click)="addWidget('alert_count')">Alert Count</button>
-        <button mat-menu-item (click)="addWidget('alert_severity')">Alerts by Severity</button>
-        <button mat-menu-item (click)="addWidget('alert_trend')">Alert Trend</button>
-        <button mat-menu-item (click)="addWidget('event_count')">Event Count</button>
-        <button mat-menu-item (click)="addWidget('event_trend')">Event Trend</button>
-        <button mat-menu-item (click)="addWidget('top_entities')">Top Entities</button>
-        <button mat-menu-item (click)="addWidget('network_traffic')">Network Traffic</button>
-        <button mat-menu-item (click)="addWidget('geo_map')">Geographic Map</button>
-      </mat-menu>
-    </div>
-  </div>
-
-  <div class="dashboard-description" *ngIf="dashboard?.description">
-    <p>{{ dashboard.description }}</p>
-  </div>
-
-  <div class="dashboard-content">
-    <!-- Loading state -->
-    <div class="loading-container" *ngIf="isLoading">
-      <mat-spinner diameter="50"></mat-spinner>
-      <p>Loading dashboard...</p>
-    </div>
-
-    <!-- Error state -->
-    <div class="error-container" *ngIf="error">
-      <div class="error-message">
-        <i class="fa fa-exclamation-triangle"></i>
-        <p>{{ error }}</p>
-      </div>
-      <button class="btn btn-primary" (click)="loadDashboard()">Try Again</button>
-    </div>
-
-    <!-- Dashboard grid -->
-    <gridster [options]="options" (dragStop)="saveLayout()" (resizeStop)="saveLayout()" *ngIf="!isLoading && !error">
-      <gridster-item [item]="widget.gridItem" *ngFor="let widget of widgets">
-        <div class="widget-container">
-          <div class="widget-header">
-            <h3>{{ widget.title }}</h3>
-            <div class="widget-actions">
-              <button class="btn-icon" (click)="refreshWidget(widget)" [disabled]="widget.loading">
-                <i class="fa fa-refresh" [class.fa-spin]="widget.loading"></i>
-              </button>
-              <button class="btn-icon" [matMenuTriggerFor]="widgetMenu">
-                <i class="fa fa-ellipsis-v"></i>
-              </button>
-              <mat-menu #widgetMenu="matMenu">
-                <button mat-menu-item (click)="refreshWidget(widget)">Refresh</button>
-                <button mat-menu-item>Edit</button>
-                <button mat-menu-item (click)="removeWidget(widget)" class="text-danger">Remove</button>
-              </mat-menu>
-            </div>
-          </div>
-          
-          <div class="widget-content">
-            <!-- Widget loading state -->
-            <div class="widget-loading" *ngIf="widget.loading">
-              <mat-spinner diameter="30"></mat-spinner>
-            </div>
-
-            <!-- Widget error state -->
-            <div class="widget-error" *ngIf="widget.error">
-              <p>{{ widget.error }}</p>
-              <button class="btn btn-sm" (click)="refreshWidget(widget)">Retry</button>
-            </div>
-
-            <!-- Widget content based on type -->
-            <ng-container *ngIf="!widget.loading && !widget.error">
-              <!-- Alert Count Widget -->
-              <div class="alert-count-widget" *ngIf="widget.type === 'alert_count' && widget.data">
-                <div class="metrics-grid">
-                  <div class="metric-card total">
-                    <div class="metric-value">{{ widget.data.count || 0 }}</div>
-                    <div class="metric-label">Total Alerts</div>
-                  </div>
-                  <div class="metric-card critical">
-                    <div class="metric-value">{{ widget.data.bySeverity.critical || 0 }}</div>
-                    <div class="metric-label">Critical</div>
-                  </div>
-                  <div class="metric-card high">
-                    <div class="metric-value">{{ widget.data.bySeverity.high || 0 }}</div>
-                    <div class="metric-label">High</div>
-                  </div>
-                  <div class="metric-card medium">
-                    <div class="metric-value">{{ widget.data.bySeverity.medium || 0 }}</div>
-                    <div class="metric-label">Medium</div>
-                  </div>
-                  <div class="metric-card low">
-                    <div class="metric-value">{{ widget.data.bySeverity.low || 0 }}</div>
-                    <div class="metric-label">Low</div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Alert Severity Widget -->
-              <div class="alert-severity-widget" *ngIf="widget.type === 'alert_severity' && widget.data">
-                <div class="chart-container">
-                  <canvas baseChart 
-                    [data]="widget.data"
-                    [type]="'pie'"
-                    [options]="{ responsive: true, maintainAspectRatio: false }">
-                  </canvas>
-                </div>
-              </div>
-
-              <!-- Alert Trend Widget -->
-              <div class="alert-trend-widget" *ngIf="widget.type === 'alert_trend' && widget.data">
-                <div class="chart-container">
-                  <canvas baseChart 
-                    [data]="widget.data"
-                    [type]="'line'"
-                    [options]="{ responsive: true, maintainAspectRatio: false }">
-                  </canvas>
-                </div>
-              </div>
-
-              <!-- Event Count Widget -->
-              <div class="event-count-widget" *ngIf="widget.type === 'event_count' && widget.data">
-                <div class="total-events">
-                  <div class="metric-value">{{ widget.data.count || 0 }}</div>
-                  <div class="metric-label">Total Events</div>
-                </div>
-                <div class="event-types">
-                  <h4>Top Event Types</h4>
-                  <ul class="event-type-list">
-                    <li *ngFor="let type of widget.data.byType | keyvalue | slice:0:5">
-                      <span class="event-type-name">{{ type.key }}</span>
-                      <span class="event-type-count">{{ type.value }}</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-
-              <!-- Other widget types would be implemented similarly -->
-              <div class="placeholder-widget" *ngIf="!['alert_count', 'alert_severity', 'alert_trend', 'event_count'].includes(widget.type)">
-                <p>{{ widget.type }} widget visualization</p>
-                <pre>{{ widget.data | json }}</pre>
-              </div>
-            </ng-container>
-          </div>
+    <!-- Header Section -->
+    <header class="dashboard-header">
+        <h1>System Dashboard</h1>
+        <div class="system-info">
+            <span>Version: {{dashboardInfo.version}}</span>
+            <span>Last Update: {{dashboardInfo.timestamp}}</span>
+            <span>Build: {{dashboardInfo.buildNumber}}</span>
         </div>
-      </gridster-item>
-    </gridster>
-  </div>
+    </header>
+
+    <!-- Metrics Overview -->
+    <section class="metrics-overview">
+        <mat-card>
+            <mat-card-header>
+                <mat-card-title>System Status</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                <div class="metrics-grid">
+                    <div class="metric-item">
+                        <div class="metric-label">CPU Usage</div>
+                        <app-gauge-chart 
+                            [value]="systemStatus.cpu"
+                            [maxValue]="100"
+                            [warning]="70"
+                            [critical]="90">
+                        </app-gauge-chart>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-label">Memory Usage</div>
+                        <app-gauge-chart 
+                            [value]="systemStatus.memory"
+                            [maxValue]="100"
+                            [warning]="80"
+                            [critical]="95">
+                        </app-gauge-chart>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-label">Network Load</div>
+                        <app-gauge-chart 
+                            [value]="systemStatus.network"
+                            [maxValue]="100"
+                            [warning]="75"
+                            [critical]="90">
+                        </app-gauge-chart>
+                    </div>
+                </div>
+            </mat-card-content>
+        </mat-card>
+    </section>
+
+    <!-- Alerts Section -->
+    <section class="alerts-section">
+        <mat-card>
+            <mat-card-header>
+                <mat-card-title>Recent Alerts</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                <mat-list>
+                    <mat-list-item *ngFor="let alert of alerts" 
+                                 [class]="'alert-severity-' + alert.severity">
+                        <mat-icon mat-list-icon>{{alert.icon}}</mat-icon>
+                        <div mat-line>{{alert.title}}</div>
+                        <div mat-line>{{alert.timestamp | date:'medium'}}</div>
+                    </mat-list-item>
+                </mat-list>
+            </mat-card-content>
+        </mat-card>
+    </section>
+
+    <!-- Recent Events -->
+    <section class="events-section">
+        <mat-card>
+            <mat-card-header>
+                <mat-card-title>Recent Events</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                <app-timeline [events]="recentEvents"></app-timeline>
+            </mat-card-content>
+        </mat-card>
+    </section>
 </div>

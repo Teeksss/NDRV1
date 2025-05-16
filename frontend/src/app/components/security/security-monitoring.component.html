@@ -1,0 +1,121 @@
+<div class="security-monitoring-container">
+    <!-- Header Section -->
+    <header class="monitoring-header" [ngClass]="systemStatus">
+        <div class="header-content">
+            <h1>Security Monitoring</h1>
+            <div class="system-info">
+                <span>Status: {{systemStatus | titlecase}}</span>
+                <span>Last Update: {{lastUpdateTime | date:'medium'}}</span>
+                <span>Version: {{componentInfo.version}}</span>
+            </div>
+        </div>
+        <div class="header-actions">
+            <button mat-raised-button color="primary" (click)="initializeMonitoring()">
+                <mat-icon>refresh</mat-icon>
+                Refresh
+            </button>
+        </div>
+    </header>
+
+    <!-- Metrics Dashboard -->
+    <section class="metrics-dashboard">
+        <mat-grid-list cols="4" rowHeight="150px">
+            <mat-grid-tile>
+                <mat-card class="metric-card">
+                    <mat-card-header>
+                        <mat-card-title>Threat Level</mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <app-threat-gauge
+                            [value]="securityMetrics.threatLevel"
+                            [warningThreshold]="50"
+                            [criticalThreshold]="75">
+                        </app-threat-gauge>
+                    </mat-card-content>
+                </mat-card>
+            </mat-grid-tile>
+            
+            <mat-grid-tile>
+                <mat-card class="metric-card">
+                    <mat-card-header>
+                        <mat-card-title>Active Threats</mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <div class="metric-value">{{securityMetrics.activeThreats}}</div>
+                    </mat-card-content>
+                </mat-card>
+            </mat-grid-tile>
+
+            <mat-grid-tile>
+                <mat-card class="metric-card">
+                    <mat-card-header>
+                        <mat-card-title>Mitigated Threats</mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <div class="metric-value">{{securityMetrics.mitigatedThreats}}</div>
+                    </mat-card-content>
+                </mat-card>
+            </mat-grid-tile>
+
+            <mat-grid-tile>
+                <mat-card class="metric-card">
+                    <mat-card-header>
+                        <mat-card-title>System Health</mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <app-health-indicator
+                            [value]="securityMetrics.systemHealth">
+                        </app-health-indicator>
+                    </mat-card-content>
+                </mat-card>
+            </mat-grid-tile>
+        </mat-grid-list>
+    </section>
+
+    <!-- Alerts and Mitigations -->
+    <section class="alerts-mitigations">
+        <div class="alerts-panel">
+            <mat-card>
+                <mat-card-header>
+                    <mat-card-title>Recent Alerts</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <mat-list>
+                        <mat-list-item *ngFor="let alert of recentAlerts"
+                                     [ngClass]="alert.severity">
+                            <mat-icon mat-list-icon>{{alert.icon}}</mat-icon>
+                            <div mat-line>{{alert.message}}</div>
+                            <div mat-line>{{alert.timestamp | date:'medium'}}</div>
+                            <button mat-button color="primary"
+                                    *ngIf="!alert.acknowledged"
+                                    (click)="acknowledgeAlert(alert.id)">
+                                Acknowledge
+                            </button>
+                        </mat-list-item>
+                    </mat-list>
+                </mat-card-content>
+            </mat-card>
+        </div>
+
+        <div class="mitigations-panel">
+            <mat-card>
+                <mat-card-header>
+                    <mat-card-title>Active Mitigations</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <mat-list>
+                        <mat-list-item *ngFor="let mitigation of activeMitigations">
+                            <mat-icon mat-list-icon>security</mat-icon>
+                            <div mat-line>{{mitigation.description}}</div>
+                            <div mat-line>Progress: {{mitigation.progress}}%</div>
+                            <mat-progress-bar
+                                [value]="mitigation.progress"
+                                [color]="mitigation.progress < 50 ? 'warn' : 'primary'">
+                            </mat-progress-bar>
+                        </mat-list-item>
+                    </mat-list>
+                </mat-card-content>
+            </mat-card>
+        </div>
+    </section>
+</div>

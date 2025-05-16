@@ -1,0 +1,155 @@
+.security-monitoring-container {
+    padding: 20px;
+    
+    .monitoring-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px;
+        margin-bottom: 24px;
+        border-radius: 8px;
+        transition: background-color 0.3s ease;
+
+        &.normal {
+            background-color: var(--success-background);
+            border-left: 4px solid var(--success-color);
+        }
+
+        &.warning {
+            background-color: var(--warning-background);
+            border-left: 4px solid var(--warning-color);
+        }
+
+        &.critical {
+            background-color: var(--error-background);
+            border-left: 4px solid var(--error-color);
+        }
+
+        .header-content {
+            h1 {
+                margin: 0;
+                font-size: 24px;
+                color: var(--text-primary);
+            }
+
+            .system-info {
+                display: flex;
+                gap: 20px;
+                margin-top: 8px;
+                font-size: 14px;
+                color: var(--text-secondary);
+            }
+        }
+
+        .header-actions {
+            button {
+                margin-left: 10px;
+            }
+        }
+    }
+
+    .metrics-dashboard {
+        margin-bottom: 24px;
+
+        .metric-card {
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            padding: 16px;
+
+            mat-card-header {
+                margin-bottom: 12px;
+            }
+
+            .metric-value {
+                font-size: 32px;
+                font-weight: 500;
+                text-align: center;
+                color: var(--text-primary);
+            }
+        }
+    }
+
+    .alerts-mitigations {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+
+        .alerts-panel, .mitigations-panel {
+            mat-card {
+                height: 100%;
+                
+                mat-card-content {
+                    max-height: 600px;
+                    overflow-y: auto;
+                }
+            }
+        }
+
+        mat-list-item {
+            &.critical {
+                background-color: var(--error-background-light);
+            }
+
+            &.warning {
+                background-color: var(--warning-background-light);
+            }
+
+            &.info {
+                background-color: var(--info-background-light);
+            }
+
+            mat-progress-bar {
+                margin-top: 8px;
+            }
+        }
+    }
+}
+
+// Responsive tasarım
+@media (max-width: 1024px) {
+    .security-monitoring-container {
+        .alerts-mitigations {
+            grid-template-columns: 1fr;
+        }
+    }
+}
+
+@media (max-width: 768px) {
+    .security-monitoring-container {
+        padding: 12px;
+
+        .monitoring-header {
+            flex-direction: column;
+            text-align: center;
+
+            .header-content {
+                .system-info {
+                    flex-direction: column;
+                    gap: 8px;
+                }
+            }
+
+            .header-actions {
+                margin-top: 16px;
+            }
+        }
+
+        .metrics-dashboard {
+            mat-grid-list {
+                cols: 2;
+            }
+        }
+    }
+}
+
+// Animasyonlar
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.critical {
+    animation: pulse 2s infinite;
+}

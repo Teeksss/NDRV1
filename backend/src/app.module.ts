@@ -1,12 +1,35 @@
-import { Module, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ScheduleModule } from '@nestjs/schedule';
-import { EventEmitterModule } from '@nestjs/event-emitter';
-import { ThrottlerModule } from '@nestjs/throttler';
-import { APP_FILTER, APP_GUARD } from '@nestjs/core';
+import { SecurityModule } from './security/security.module';
+import { NetworkModule } from './network/network.module';
+import { AnalyticsModule } from './analytics/analytics.module';
+import { AuthModule } from './auth/auth.module';
+import { UserModule } from './user/user.module';
 
-import configuration from './config/configuration';
-import { validate } from './config/validation';
-
-import { AppController }
+@Module({
+    imports: [
+        ConfigModule.forRoot({
+            isGlobal: true,
+            envFilePath: `.env.${process.env.NODE_ENV || 'development'}`
+        }),
+        MongooseModule.forRoot(process.env.MONGODB_URI),
+        SecurityModule,
+        NetworkModule,
+        AnalyticsModule,
+        AuthModule,
+        UserModule
+    ],
+    providers: [
+        {
+            provide: 'APP_CONFIG',
+            useValue: {
+                version: '3.2.0',
+                lastUpdate: '2025-05-16 06:51:00',
+                maintainer: 'Teeksss',
+                buildNumber: '202505160651'
+            }
+        }
+    ]
+})
+export class AppModule {}

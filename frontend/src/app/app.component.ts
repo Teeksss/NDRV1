@@ -1,98 +1,96 @@
 import { Component, OnInit } from '@angular/core';
-import { ThemeService } from './services/theme.service';
-import { WebsocketService } from './services/websocket.service';
+import { SecurityService } from './services/security.service';
 import { AuthService } from './services/auth.service';
-import { NotificationService } from './services/notification.service';
-import { Router, NavigationEnd } from '@angular/router';
-import { filter } from 'rxjs/operators';
-import { environment } from '../environments/environment';
+import { ThemeService } from './services/theme.service';
 
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+    selector: 'app-root',
+    template: `
+        <app-header 
+            [user]="currentUser" 
+            [systemStatus]="systemStatus"
+            (themeChange)="onThemeChange($event)">
+        </app-header>
+        
+        <main class="main-content" [class.dark-theme]="isDarkTheme">
+            <app-sidebar 
+                [menuItems]="navigationItems"
+                [collapsed]="sidebarCollapsed">
+            </app-sidebar>
+            
+            <div class="content-wrapper">
+                <router-outlet></router-outlet>
+            </div>
+        </main>
+
+        <app-footer 
+            [version]="appInfo.version"
+            [lastUpdate]="appInfo.lastUpdate"
+            [maintainer]="appInfo.maintainer">
+        </app-footer>
+
+        <app-notification></app-notification>
+    `
 })
 export class AppComponent implements OnInit {
-  title = 'NDR Korelasyon Motoru';
-  sidebarCollapsed = false;
-  isLoggedIn = false;
-  appVersion = environment.version;
+    appInfo = {
+        version: '3.2.0',
+        lastUpdate: '2025-05-16 06:51:00',
+        maintainer: 'Teeksss',
+        buildNumber: '202505160651'
+    };
 
-  constructor(
-    private themeService: ThemeService,
-    private websocketService: WebsocketService,
-    private authService: AuthService,
-    private notificationService: NotificationService,
-    private router: Router
-  ) {}
+    currentUser: any;
+    systemStatus: any;
+    isDarkTheme = false;
+    sidebarCollapsed = false;
+    navigationItems = [
+        { title: 'Dashboard', icon: 'dashboard', route: '/dashboard' },
+        { title: 'Security', icon: 'security', route: '/security' },
+        { title: 'Network', icon: 'network', route: '/network' },
+        { title: 'Analytics', icon: 'analytics', route: '/analytics' },
+        { title: 'Settings', icon: 'settings', route: '/settings' }
+    ];
 
-  ngOnInit(): void {
-    // Initialize theme
-    this.themeService.initializeTheme();
+    constructor(
+        private securityService: SecurityService,
+        private authService: AuthService,
+        private themeService: ThemeService
+    ) {}
 
-    // Listen for authentication status changes
-    this.authService.isLoggedIn$.subscribe(isLoggedIn => {
-      this.isLoggedIn = isLoggedIn;
-      
-      // Connect to WebSocket when logged in
-      if (isLoggedIn) {
-        this.websocketService.connect();
-      } else {
-        this.websocketService.disconnect();
-      }
-    });
-
-    // Track page navigation for analytics
-    this.router.events
-      .pipe(filter(event => event instanceof NavigationEnd))
-      .subscribe((event: NavigationEnd) => {
-        this.trackPageView(event.urlAfterRedirects);
-      });
-
-    // Initialize notification listeners
-    this.initializeNotificationListeners();
-  }
-
-  /**
-   * Toggle sidebar collapsed state
-   */
-  toggleSidebar() {
-    this.sidebarCollapsed = !this.sidebarCollapsed;
-  }
-
-  /**
-   * Initialize notification listeners for real-time alerts
-   */
-  private initializeNotificationListeners() {
-    // Only set up listeners if user is logged in
-    if (this.isLoggedIn) {
-      // Listen for alert notifications
-      this.websocketService.onEvent('alert')
-        .subscribe(alert => {
-          this.notificationService.showNotification(
-            `New Alert: ${alert.title}`,
-            alert.severity,
-            `/alerts/${alert.id}`
-          );
-        });
-
-      // Listen for system notifications
-      this.websocketService.onEvent('notification')
-        .subscribe(notification => {
-          this.notificationService.showNotification(
-            notification.title,
-            notification.type,
-            notification.link
-          );
-        });
+    async ngOnInit() {
+        this.initializeApp();
     }
-  }
 
-  /**
-   * Track page view for analytics
-   */
-  private trackPageView(url: string) {
-    // Implement analytics tracking here
-    console.log(`Page view: ${url}`);
-  }
+    private async initializeApp() {
+        try {
+            await this.loadUserData();
+            await this.loadSystemStatus();
+            this.initializeTheme();
+            this.startRealTimeUpdates();
+        } catch (error) {
+            console.error('App initialization error:', error);
+        }
+    }
+
+    private async loadUserData() {
+        this.currentUser = await this.authService.getCurrentUser();
+    }
+
+    private async loadSystemStatus() {
+        this.systemStatus = await this.securityService.getSystemStatus();
+    }
+
+    private initializeTheme() {
+        this.isDarkTheme = this.themeService.getCurrentTheme() === 'dark';
+    }
+
+    private startRealTimeUpdates() {
+        this.securityService.startRealTimeUpdates();
+    }
+
+    onThemeChange(isDark: boolean) {
+        this.isDarkTheme = isDark;
+        this.themeService.setTheme(isDark ? 'dark' : 'light');
+    }
 }
