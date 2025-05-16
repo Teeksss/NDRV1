@@ -1,37 +1,38 @@
-# NDR Korelasyon Motoru
+# NDRV1 - Network Detection and Response Platform
 
-NDR Korelasyon Motoru, ağ trafiğini izleyen ve güvenlik olaylarını korelasyon kuralları ile analiz ederek tehditleri tespit eden gelişmiş bir güvenlik izleme sistemidir.
+NDRV1, modern ağ güvenliği izleme ve tehdit tespiti için geliştirilmiş kapsamlı bir Network Detection and Response (NDR) platformudur. Gerçek zamanlı ağ trafiği analizi, anomali tespiti ve tehdit istihbaratı entegrasyonu sağlar.
 
-## Özellikler
+![NDRV1 Dashboard](./docs/images/dashboard-preview.png)
 
-- **Olay Korelasyonu**: Gelişmiş korelasyon kuralları ile farklı kaynaklardaki olayları ilişkilendirme
-- **Anomali Tespiti**: İstatistiksel ve davranışsal analiz ile anormal durumları tespit etme
-- **Tehdit İstihbaratı Entegrasyonu**: Dış istihbarat kaynaklarından tehdit verilerini entegre etme
-- **Gerçek Zamanlı İzleme**: Anlık veri akışı ve otomatik bildirimler
-- **Özelleştirilebilir Gösterge Panelleri**: Esnek, widget tabanlı gösterge panelleri
-- **Kapsamlı Varlık Yönetimi**: Ağ varlıklarının izlenmesi ve yönetimi
-- **MITRE ATT&CK Entegrasyonu**: Tehditlerin standart çerçeve içinde kategorize edilmesi
-- **Otomatik Yanıt Eylemleri**: Tehditlere karşı otomatik yanıt mekanizmaları
-- **Ölçeklenebilir Mimari**: Yüksek veri hacimlerini işleyebilen modüler tasarım
+## 🚀 Özellikler
 
-## Sistem Gereksinimleri
+- **Gerçek Zamanlı Ağ Trafiği İzleme**: Ağ trafiğini canlı olarak izleyin ve analiz edin
+- **Tehdit Algılama**: Gelişmiş algoritmalar ile anormal ağ davranışlarını tespit edin
+- **Güvenlik Uyarıları**: Potansiyel tehditlere karşı anında uyarılar alın
+- **Network Görselleştirme**: Ağ topolojisini ve tehdit aktivitelerini görsel olarak inceleyin
+- **Tehdit İstihbaratı Entegrasyonu**: Dış tehdit istihbaratı kaynaklarıyla entegrasyon
+- **Raporlama ve Analiz**: Kapsamlı güvenlik raporları ve analizleri oluşturun
 
-- Node.js 18+
-- MongoDB 5.0+
-- Docker ve Docker Compose (opsiyonel)
-- Kubernetes (opsiyonel)
+## 🛠️ Teknoloji Yığını
 
-## Kurulum
+- **Frontend**: TypeScript, React, SCSS
+- **Backend**: Node.js, Express
+- **Veritabanı**: MongoDB
+- **Gerçek Zamanlı İletişim**: WebSockets
+- **Konteynerizasyon**: Docker
+- **CI/CD**: GitHub Actions
 
-### Önkoşullar
+## 📋 Başlangıç
 
-- Node.js 18 veya üzeri
-- MongoDB 5.0 veya üzeri
-- npm veya yarn paket yöneticisi
+### Gereksinimler
 
-### Standart Kurulum
+- Node.js (v16 veya üzeri)
+- Docker ve Docker Compose
+- MongoDB (veya Docker ile çalıştırılabilir)
+
+### Kurulum
 
 1. Repoyu klonlayın:
-   ```bash
-   git clone https://github.com/teeksss/ndr-korelasyon-motoru.git
-   cd ndr-korelasyon-motoru
+```bash
+git clone https://github.com/Teeksss/NDRV1.git
+cd NDRV1

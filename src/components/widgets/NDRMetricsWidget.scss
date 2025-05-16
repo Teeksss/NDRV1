@@ -1,0 +1,36 @@
+@import "@/styles/variables";
+@import "@/styles/mixins";
+
+.ndr-metrics-widget {
+  &__loading,
+  &__error,
+  &__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    padding: $spacing-md;
+    
+    p {
+      margin-top: $spacing-sm;
+      color: var(--text-color-secondary);
+    }
+  }
+  
+  &__chart {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    margin-top: $spacing-md;
+  }
+  
+  &__updated {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    font-size: $font-size-xs;
+    color: var(--text-color-tertiary);
+    padding: $spacing-xs;
+  }
+}

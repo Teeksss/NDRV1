@@ -1,0 +1,115 @@
+%YAML 1.1
+---
+# Suricata NDRV1 entegrasyonu için yapılandırma
+
+vars:
+  address-groups:
+    HOME_NET: "[192.168.0.0/16,10.0.0.0/8,172.16.0.0/12]"
+    EXTERNAL_NET: "!$HOME_NET"
+    
+  port-groups:
+    HTTP_PORTS: "80,8080,8000,8008,8080"
+    HTTPS_PORTS: "443"
+    SSH_PORTS: "22"
+    DNS_PORTS: "53"
+    SMTP_PORTS: "25,587,465"
+
+outputs:
+  - eve-log:
+      enabled: yes
+      filetype: redis
+      redis:
+        server: redis
+        port: 6379
+        mode: list
+        key: suricata
+      types:
+        - alert
+        - anomaly
+        - http
+        - dns
+        - tls
+        - files
+        - ssh
+        - flow
+        - netflow
+        - smtp
+        - stats
+
+  - stats:
+      enabled: yes
+      filename: stats.log
+      interval: 30
+
+  - alert-debug:
+      enabled: no
+      filename: alert-debug.log
+
+logging:
+  default-log-level: info
+  outputs:
+    - console:
+        enabled: yes
+    - file:
+        enabled: yes
+        filename: /var/log/suricata/suricata.log
+
+af-packet:
+  - interface: eth0
+    cluster-id: 99
+    cluster-type: cluster_flow
+    defrag: yes
+    use-mmap: yes
+    mmap-locked: yes
+    tpacket-v3: yes
+    buffer-size: 128mb
+    
+detect-engine:
+  - profile: medium
+  - custom-values:
+      toclient-src-groups: 2
+      toclient-dst-groups: 2
+      toclient-sp-groups: 2
+      toclient-dp-groups: 3
+      toserver-src-groups: 2
+      toserver-dst-groups: 4
+      toserver-sp-groups: 2
+      toserver-dp-groups: 25
+  - sgh-mpm-context: auto
+  - inspection-recursion-limit: 3000
+
+threading:
+  set-cpu-affinity: yes
+  cpu-affinity:
+    - management-cpu-set:
+        cpu: [ 0 ]
+    - receive-cpu-set:
+        cpu: [ 0 ]
+    - worker-cpu-set:
+        cpu: [ "all" ]
+        mode: "exclusive"
+        prio:
+          default: "high"
+
+app-layer:
+  protocols:
+    http:
+      enabled: yes
+    tls:
+      enabled: yes
+    dns:
+      enabled: yes
+    ssh:
+      enabled: yes
+    smtp:
+      enabled: yes
+    smb:
+      enabled: yes
+    nfs:
+      enabled: yes
+    rdp:
+      enabled: yes
+    modbus:
+      enabled: yes
+    iec104:
+      enabled: yes
